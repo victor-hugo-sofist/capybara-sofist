@@ -1,0 +1,208 @@
+require:
+  - rubocop-minitest
+  - rubocop-performance
+  - rubocop-rake
+  - rubocop-rspec
+  - rubocop-capybara
+
+AllCops:
+  NewCops: enable
+  DisabledByDefault: false
+  TargetRubyVersion: 3.0
+  Exclude:
+      - 'vendor/**/*'
+      - 'gemfiles/vendor/**/*'
+
+#################### Capybara ##################
+
+Capybara/NegationMatcher:
+  Enabled: false
+
+#################### Gemspec ###################
+
+Gemspec/DevelopmentDependencies:
+  Enabled: false
+
+#################### Layout ####################
+
+Layout/AccessModifierIndentation:
+  EnforcedStyle: outdent
+
+Layout/CaseIndentation:
+  EnforcedStyle: end
+
+Layout/EmptyLineBetweenDefs:
+  AllowAdjacentOneLineDefs: true
+
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable
+
+Layout/FirstArrayElementIndentation:
+  EnforcedStyle: consistent
+
+Layout/IndentationWidth:
+  AllowedPatterns: ['^\s*module']
+
+Layout/LineLength:
+  # Limit lines to 120 characters
+  # https://github.com/rubocop/ruby-style-guide#maximum-line-length
+  Exclude:
+    - 'spec/**/*'
+    - 'lib/capybara/spec/**/*'
+  AllowedPatterns:
+    - '\s+# _?rubocop'
+    - '^\s*#'
+    - '^\s*(raise|warn|Capybara::Helpers.warn) '
+  Max: 120
+
+#################### Lint ####################
+
+Lint/EmptyBlock:
+  Exclude:
+    - 'lib/capybara/spec/**/*'
+    - 'spec/**/*.rb'
+
+Lint/UnusedMethodArgument:
+  Exclude:
+    - 'lib/capybara/driver/base.rb'
+    - 'lib/capybara/driver/node.rb'
+
+#################### Metrics ####################
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - 'lib/capybara/spec/**/*'
+    - 'capybara.gemspec'
+  AllowedMethods:
+    - Capybara.add_selector
+    - Capybara::Selector::FilterSet.add
+
+Metrics/ClassLength:
+  CountComments: false
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+Metrics/MethodLength:
+  CountComments: false
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+  CountComments: false
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
+
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+#################### Naming ####################
+
+Naming/MethodParameterName:
+  AllowedNames:
+    - 'el'
+    - 'id'
+    - 'c'
+    - 'x'
+    - 'y'
+    - 'on'
+
+Naming/PredicateName:
+  Exclude:
+    - '**/*/*matchers.rb'
+
+#################### Performance ####################
+
+Performance/MethodObjectAsBlock:
+  Enabled: false
+
+#################### RSpec ####################
+
+RSpec/Capybara/FeatureMethods:
+  Enabled: false
+
+RSpec/ContextWording:
+  Enabled: false
+
+RSpec/DescribeClass:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/ExampleWording:
+  Enabled: false
+
+RSpec/FilePath:
+  Enabled: false
+
+RSpec/InstanceVariable:
+  AssignmentOnly: true
+
+RSpec/MultipleExpectations:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Enabled: false
+
+RSpec/NoExpectationExample:
+  Enabled: false
+
+RSpec/PredicateMatcher:
+  Exclude:
+    - 'spec/basic_node_spec.rb'
+
+#################### Security ####################
+
+Security/YAMLLoad:
+  Exclude:
+    - 'lib/capybara/spec/**/*'
+    - 'spec/**/*'
+
+#################### Style ####################
+
+Style/AccessorGrouping:
+  Enabled: false
+
+Style/Alias:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
+Style/Documentation:
+  Exclude:
+    - 'lib/capybara/spec/**/*'
+    - 'spec/**/*'
+  Enabled: false
+
+Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+
+Style/EmptyElse:
+  EnforcedStyle: empty
+
+Style/IfUnlessModifier:
+  Exclude:
+    - 'spec/**/*'
+
+Style/NumericLiterals:
+  Exclude:
+    - 'lib/capybara/spec/**/*'
+    - 'spec/**/*'
+
+Style/ParallelAssignment:
+  Enabled: false
+
+Style/SingleLineMethods:
+  Enabled: false
+
+Style/SpecialGlobalVars:
+  Exclude:
+    - 'capybara.gemspec'

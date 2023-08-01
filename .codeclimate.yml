@@ -1,0 +1,51 @@
+---
+version: "2"
+checks:
+  method-count:
+    enabled: false
+  file-lines:
+    config:
+      threshold: 500
+  method-complexity:
+    config:
+      threshold: 10
+engines:
+  bundler-audit:
+    enabled: false
+  csslint:
+    enabled: false
+  duplication:
+    enabled: true
+    exclude_patterns:
+    - "lib/capybara/selector.rb"
+    - "lib/capybara/minitest.rb"
+    - "lib/capybara/selector/definition/"
+    - "lib/capybara/rspec/matchers/"
+    config:
+      languages:
+        ruby:
+          mass_threshold: 25
+  eslint:
+    enabled: false
+  fixme:
+    enabled: true
+  rubocop:
+    enabled: true
+    channel: rubocop-0-72
+    exclude_fingerprints:
+    - affb30770e6ef0780044f5646e28d817
+ratings:
+  paths:
+  - Gemfile.lock
+  - "**.css"
+  - "**.inc"
+  - "**.js"
+  - "**.jsx"
+  - "**.module"
+  - "**.php"
+  - "**.py"
+  - "**.rb"
+exclude_paths:
+- features/
+- spec/
+- lib/capybara/spec/
