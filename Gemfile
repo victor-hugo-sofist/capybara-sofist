@@ -18,3 +18,7 @@ gem 'pry' #Pry - permite inserir o binding.pry para se realizar a atividade de d
 gem 'httparty'
 
 gem 'json'
+
+gem 'jsonpath'
+
+gem 'logger'
