@@ -18,32 +18,46 @@ class Log
     @log.info ("Step") { content }
   end
 
-  def self.step_error (content)
-    @log.info ("Then") { content }
+  def self.step_debug (content)
+    @log.debug ("Step") { content }
+  end
+
+  def self.step_error (message, backtrace)
+
+    backtrace = backtrace.join("\n")
+
+    @log.error ("Then ERROR Message") { message }
+    @log.error ("Then ERROR backtrace") { backtrace }
   end
 
   def self.request_info (url, method, content)
-    @log.info ("URL: " + url + " -- Method: " + method) { content }
+    @log.info ("Method: " + method + " -- URL: " + url) { content }
   end
 
   def self.request_error (url, method, content)
-    @log.error ("URL: " + url + " -- Method: " + method) { content }
+    @log.error ("Method: " + method + " -- URL: " + url) { content }
   end
 
   def self.request_warn (url, method, content)
-    @log.warn ("URL: " + url + " -- Method: " + method) { content }
+    @log.warn ("Method: " + method + " -- URL: " + url) { content }
   end
 
   def self.request_fatal (url, method, content)
-    @log.fatal ("URL: " + url + " -- Method: " + method) { content }
+    @log.fatal ("Method: " + method + " -- URL: " + url) { content }
   end
 
   def self.format_payload (payload)
+
+    if payload.nil?
+      payload = 'nil'
+    end
+
     payload = payload.strip
+    
     if payload.empty?
       payload = 'nil'
     end
-    
+
     content = "\n   Payload: #{payload}"
     return content
   end
@@ -73,7 +87,6 @@ class HTTPRequests
       response = get(url, options)
       Log.request_info(url, get_method, Log.format_response_body(response.body, response.code))
       if response.code != expected_status_code
-        # Log.request_warn(url, get_method, "The expected status code is #{expected_status_code}, but received #{response.code}")
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
       return response

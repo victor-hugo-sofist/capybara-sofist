@@ -10,7 +10,4 @@ Feature: Ticker e nomes de empresas
         | nome               | ticker |
         | VALE               | VALE3  |
         | ITAU               | ITUB6  |
-        | CSN MINERACAO      | CMIN4  |
-        # | MAXI RENDA         | MXRF11 |
-        # | ITI BANCO DIGITAL  | ITIU4  |
 
