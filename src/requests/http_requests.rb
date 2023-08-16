@@ -27,7 +27,8 @@ class Log
     backtrace = backtrace.join("\n")
 
     @log.error ("Then ERROR Message") { message }
-    @log.error ("Then ERROR backtrace") { backtrace }
+    @log.error ("Then ERROR Backtrace") { backtrace }
+
   end
 
   def self.request_info (url, method, content)
@@ -63,7 +64,13 @@ class Log
   end
 
   def self.format_response_body (response_body, status_code)
+  
+  if  response_body.nil?
+    response_body = 'nil'
+  end
+
   response_body = response_body.strip
+  
   if response_body.empty?
     response_body = 'nil'
   end

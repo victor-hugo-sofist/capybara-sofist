@@ -10,4 +10,3 @@ Feature: Ticker e nomes de empresas
         | nome               | ticker |
         | VALE               | VALE3  |
         | ITAU               | ITUB6  |
-
