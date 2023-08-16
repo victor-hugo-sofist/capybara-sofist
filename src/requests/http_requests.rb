@@ -24,7 +24,8 @@ class Log
 
   def self.step_error (message, backtrace)
 
-    backtrace = backtrace.join("\n")
+    message = message.sub("\n", "\n   ")
+    backtrace = backtrace.join("\n   ")
 
     @log.error ("Then ERROR Message") { message }
     @log.error ("Then ERROR Backtrace") { backtrace }
@@ -75,7 +76,7 @@ class Log
     response_body = 'nil'
   end
 
-  content = "\n   Response: #{response_body}\n   Status code: #{status_code}"
+  content = "\n   Status code: #{status_code}\n   Response: #{response_body}"
   return content
   end
 end
