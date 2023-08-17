@@ -93,8 +93,8 @@ end
 Quando("consultamos o endpoint stock procurando pelo produto produto financeiro NEEW3 devemos obter o status 200") do
 
   Log.step_debug("Quando consultamos o endpoint stock procurando pelo produto produto financeiro NEEW3 devemos obter o status 200")
-  @response = HTTPRequests.retryable_get_based_in_status_code('http://192.168.0.40:5000/stock/NEEW3/', 200, headers: { 'Content-Type' => 'application/json' })
-
+  # @response = HTTPRequests.retryable_get_based_in_status_code('http://192.168.0.40:5000/stock/NEEW3/', 200, headers: { 'Content-Type' => 'application/json' })
+  @response = HTTPRequests.retryable_get_if_has_json_path('http://192.168.0.40:5000/stock/NEEW3/', "$.Content.Stock[?(@.Symbol == 'NEEW3')]", headers: { 'Content-Type' => 'application/json' })
 end
 
 Quando("consultamos o endpoint stock procurando pelo produto produto financeiro NEEW3 devemos obter o status 400") do

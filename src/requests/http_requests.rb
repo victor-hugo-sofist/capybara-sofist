@@ -19,7 +19,7 @@ class Log
   end
 
   def self.theme_and_debug (theme, content)
-    @log.info (theme) { content }
+    @log.debug (theme) { content }
   end
   
   def self.step_info (content)
@@ -204,8 +204,10 @@ class HTTPRequests
       Log.request_info(url, get_method, Log.format_response_body(response.body, response.code))
       value = find_value_by_path(response.body, json_path_filter)
       if !value.empty?
+        Log.request_info(url, get_method, "JSON path result: #{value}")
         return response
       end
+      Log.request_info(url, get_method, "JSON path result: 'nil'")
       raise Json_path_without_results
     rescue StandardError => e
       Log.request_warn(url, get_method, e.message)
@@ -227,7 +229,6 @@ class HTTPRequests
     parsed_data_json = JSON.parse(json_data)
     json_path = JsonPath.new(path)
     result = json_path.on(parsed_data_json)
-    Log.theme_and_info("FILTER RESULT", result)
     return result
   end
 end
