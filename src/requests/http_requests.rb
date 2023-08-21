@@ -14,6 +14,10 @@ class Log
   file = File.open('logs/test_logs.log', File::WRONLY | File::APPEND | File::CREAT)
   @log = Logger.new(file)
 
+  def self.test_end ()
+    @log.debug ("TEST END") { "\n\n" }
+  end
+
   def self.theme_and_info (theme, content)
     @log.info (theme) { content }
   end
@@ -108,7 +112,7 @@ class HTTPRequests
         retry
       else
         Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.theme_and_debug("END", "\n\n")
+        Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts. Error: #{e.message}"
       end
     end
@@ -133,7 +137,7 @@ class HTTPRequests
         retry
       else
         Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.theme_and_debug("END", "\n\n")
+        Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -158,7 +162,7 @@ class HTTPRequests
         retry
       else
         Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.theme_and_debug("END", "\n\n")
+        Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -183,7 +187,7 @@ class HTTPRequests
         retry
       else
         Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.theme_and_debug("END", "\n\n")
+        Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -200,7 +204,7 @@ class HTTPRequests
         Log.request_info(url, "JSON path result: #{value}")
         return response
       end
-      Log.request_info(url, "JSON path result: 'nil'")
+      Log.request_info(url, "JSON path result: nil")
       raise Json_path_without_results
     rescue StandardError => e
       Log.request_warn(url, e.message)
@@ -211,7 +215,7 @@ class HTTPRequests
         retry
       else
         Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.theme_and_debug("END", "\n\n")
+        Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end

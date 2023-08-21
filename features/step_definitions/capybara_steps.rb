@@ -31,12 +31,12 @@ Então("devemos encontrar detalhes com o nome da empresa junto ao seu ticker {st
   begin
     expect(@result). not_to be_nil
     expect(@result['Symbol']). to eql(ticker)
-  rescue => e
+  rescue RSpec::Expectations::ExpectationNotMetError => e
     Log.step_error(e.message, e.backtrace)
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end()
     raise e
   else
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end() #Esta estrutura com else só deve existir caso seja a última validação do teste
   end
 end
 
@@ -54,12 +54,12 @@ Então("devemos encontrar detalhes com o nome da empresa junto ao seu preço de 
   begin
     expect(@result). not_to be_nil
     expect(@result['Price']).to be == price
-  rescue => e
+  rescue RSpec::Expectations::ExpectationNotMetError => e
     Log.step_error(e.message, e.backtrace)
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end()
     raise e
   else
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end() #Esta estrutura com else só deve existir caso seja a última validação do teste
   end
 end
 
@@ -81,12 +81,12 @@ Então("devemos alterar o preço com base em um valor aleatório") do
   begin
     expect(@result). not_to be_nil
     expect(@result['Price']).to be == @random_price
-  rescue => e
+  rescue RSpec::Expectations::ExpectationNotMetError => e
     Log.step_error(e.message, e.backtrace)
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end()
     raise e
   else
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end() #Esta estrutura com else só deve existir caso seja a última validação do teste
   end
 end
 
@@ -128,11 +128,11 @@ Então("o produto não deve mais constar na base de dados") do
   @response = HTTPRequests.retryable_get_based_in_status_code('http://192.168.0.40:5000/stock/NEEW3/', 400, headers: { 'Content-Type' => 'application/json' })
   begin
     expect(@response.code).to be == 400
-  rescue => e
+  rescue RSpec::Expectations::ExpectationNotMetError => e
     Log.step_error(e.message, e.backtrace)
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end()
     raise e
   else
-    Log.theme_and_debug("END", "\n\n")
+    Log.test_end() #Esta estrutura com else só deve existir caso seja a última validação do teste
   end
 end
