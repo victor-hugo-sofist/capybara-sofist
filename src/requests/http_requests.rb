@@ -10,6 +10,16 @@ end
 class Json_path_without_results < StandardError
 end
 
+class Unexpected_request_method < StandardError
+end
+
+class HTTPMethod
+  GET = "GET"
+  POST = "POST"
+  DELETE = "DELETE"
+  PATCH = "PATCH"
+end
+
 class Log
 
   current_time = DateTime.now
@@ -97,12 +107,32 @@ class HTTPRequests
   MAX_RETRIES = 2
   RETRY_INTERVAL = 2 # Em segundos, pode ser ajustado conforme a necessidade
 
-  def self.retryable_get_based_in_status_code(url, expected_status_code, options = {})
-    get_method = 'GET'
+  def self.retryable_based_in_status_code(url, method, expected_status_code, options = {})
+
+    request_method = nil
     retries = 0
+    response = nil
+
     begin
-      response = get(url, options)
-      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, get_method))
+
+      case method
+      when HTTPMethod::GET
+        request_method = HTTPMethod::GET
+        response = get(url, options)
+      when HTTPMethod::POST
+        request_method = HTTPMethod::POST
+        response = post(url, options)
+      when HTTPMethod::DELETE
+        request_method = HTTPMethod::DELETE
+        response = delete(url, options)
+      when HTTPMethod::PATCH
+        request_method = HTTPMethod::PATCH
+        response = patch(url, options)
+      else
+        raise Unexpected_request_method
+      end
+      
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, request_method))
       if response.code != expected_status_code
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
@@ -121,88 +151,33 @@ class HTTPRequests
       end
     end
   end
+ 
+  def self.retryable_based_in_json_path(url, method, json_path_filter, options = {})
 
-  def self.retryable_post_based_in_status_code(url, expected_status_code, options = {})
-    post_method = 'POST'
+    request_method = nil
     retries = 0
+    response = nil
+
     begin
-      response = post(url, options)
-      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, post_method))
-      if response.code != expected_status_code
-        raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
-      end
-      return response
-    rescue StandardError => e
-      Log.request_warn(url, e.message)
-      retries += 1
-      if retries <= MAX_RETRIES
-        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
-        sleep(RETRY_INTERVAL)
-        retry
+      
+      case method
+      when HTTPMethod::GET
+        request_method = HTTPMethod::GET
+        response = get(url, options)
+      when HTTPMethod::POST
+        request_method = HTTPMethod::POST
+        response = post(url, options)
+      when HTTPMethod::DELETE
+        request_method = HTTPMethod::DELETE
+        response = delete(url, options)
+      when HTTPMethod::PATCH
+        request_method = HTTPMethod::PATCH
+        response = patch(url, options)
       else
-        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.test_end()
-        raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
+        raise Unexpected_request_method
       end
-    end
-  end
 
-  def self.retryable_delete_based_in_status_code(url, expected_status_code, options = {})
-    delete_method = 'DELETE'
-    retries = 0
-    begin
-      response = delete(url, options)
-      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, delete_method))
-      if response.code != expected_status_code
-        raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
-      end
-      return response
-    rescue StandardError => e
-      Log.request_warn(url, e.message)
-      retries += 1
-      if retries <= MAX_RETRIES
-        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
-        sleep(RETRY_INTERVAL)
-        retry
-      else
-        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.test_end()
-        raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
-      end
-    end
-  end
-
-  def self.retryable_patch_based_in_status_code(url, expected_status_code, options = {})
-    patch_method = 'PATCH'
-    retries = 0
-    begin
-      response = patch(url, options)
-      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, patch_method))
-      if response.code != expected_status_code
-        raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
-      end
-      return response
-    rescue StandardError => e
-      Log.request_warn(url, e.message)
-      retries += 1
-      if retries <= MAX_RETRIES
-        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
-        sleep(RETRY_INTERVAL)
-        retry
-      else
-        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
-        Log.test_end()
-        raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
-      end
-    end
-  end
-
-  def self.retryable_get_if_has_json_path(url, json_path_filter, options = {})
-    get_method = 'GET'
-    retries = 0
-    begin
-      response = get(url, options)
-      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, get_method))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, request_method))
       value = find_value_by_path(response.body, json_path_filter)
       if !value.empty?
         Log.request_info(url, "JSON path result: #{value}")
