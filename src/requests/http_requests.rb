@@ -35,29 +35,29 @@ class Log
     message = message.sub("\n", "\n   ")
     backtrace = backtrace.join("\n   ")
 
-    @log.error ("Then ERROR Message") { message }
-    @log.error ("Then ERROR Backtrace") { backtrace }
+    @log.error ("Message") { message }
+    @log.error ("Backtrace") { backtrace }
 
   end
 
-  def self.request_info (url, method, content)
-    @log.info ("Method: " + method + " -- URL: " + url) { content }
+  def self.request_info (url, content)
+    @log.info ("Request URL: " + url) { content }
   end
 
-  def self.request_error (url, method, content)
-    @log.error ("Method: " + method + " -- URL: " + url) { content }
+  def self.request_error (url, content)
+    @log.error ("Request URL: " + url) { content }
   end
 
-  def self.request_warn (url, method, content)
-    @log.warn ("Method: " + method + " -- URL: " + url) { content }
+  def self.request_warn (url, content)
+    @log.warn ("Request URL: " + url) { content }
   end
 
-  def self.request_fatal (url, method, content)
-    @log.fatal ("Method: " + method + " -- URL: " + url) { content }
+  def self.request_fatal (url, content)
+    @log.fatal ("Request URL: " + url) { content }
   end
 
-  def self.format_payload (payload)
-
+  def self.format_request_info (payload, response_body, status_code, request_method)
+  
     if payload.nil?
       payload = 'nil'
     end
@@ -68,24 +68,18 @@ class Log
       payload = 'nil'
     end
 
-    content = "\n   Payload: #{payload}"
+    if  response_body.nil?
+      response_body = 'nil'
+    end
+  
+    response_body = response_body.strip
+    
+    if response_body.empty?
+      response_body = 'nil'
+    end
+  
+    content = "\n   Request Method: #{request_method}\n   Status Code: #{status_code}\n   Payload: #{payload}\n   Response: #{response_body}"
     return content
-  end
-
-  def self.format_response_body (response_body, status_code)
-  
-  if  response_body.nil?
-    response_body = 'nil'
-  end
-
-  response_body = response_body.strip
-  
-  if response_body.empty?
-    response_body = 'nil'
-  end
-
-  content = "\n   Status code: #{status_code}\n   Response: #{response_body}"
-  return content
   end
 end
 
@@ -99,22 +93,22 @@ class HTTPRequests
     get_method = 'GET'
     retries = 0
     begin
-      Log.request_info(url, get_method, Log.format_payload(options[:body]))
       response = get(url, options)
-      Log.request_info(url, get_method, Log.format_response_body(response.body, response.code))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, get_method))
       if response.code != expected_status_code
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
       return response
     rescue StandardError => e
-      Log.request_warn(url, get_method, e.message)
+      Log.request_warn(url, e.message)
       retries += 1
       if retries <= MAX_RETRIES
-        Log.request_info(url, get_method,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
+        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
         sleep(RETRY_INTERVAL)
         retry
       else
-        Log.request_error(url, get_method,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace}")
+        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+        Log.theme_and_debug("END", "\n\n")
         raise "Failed after #{MAX_RETRIES} attempts. Error: #{e.message}"
       end
     end
@@ -124,22 +118,22 @@ class HTTPRequests
     post_method = 'POST'
     retries = 0
     begin
-      Log.request_info(url, post_method, Log.format_payload(options[:body]))
       response = post(url, options)
-      Log.request_info(url, post_method, Log.format_response_body(response.body, response.code))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, post_method))
       if response.code != expected_status_code
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
       return response
     rescue StandardError => e
-      Log.request_warn(url, post_method, e.message)
+      Log.request_warn(url, e.message)
       retries += 1
       if retries <= MAX_RETRIES
-        Log.request_info(url, post_method,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
+        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
         sleep(RETRY_INTERVAL)
         retry
       else
-        Log.request_error(url, post_method,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace}")
+        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+        Log.theme_and_debug("END", "\n\n")
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -149,22 +143,22 @@ class HTTPRequests
     delete_method = 'DELETE'
     retries = 0
     begin
-      Log.request_info(url, delete_method, Log.format_payload(options[:body]))
       response = delete(url, options)
-      Log.request_info(url, delete_method, Log.format_response_body(response.body, response.code))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, delete_method))
       if response.code != expected_status_code
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
       return response
     rescue StandardError => e
-      Log.request_warn(url, delete_method, e.message)
+      Log.request_warn(url, e.message)
       retries += 1
       if retries <= MAX_RETRIES
-        Log.request_info(url, delete_method,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
+        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
         sleep(RETRY_INTERVAL)
         retry
       else
-        Log.request_error(url, delete_method,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace}")
+        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+        Log.theme_and_debug("END", "\n\n")
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -174,22 +168,22 @@ class HTTPRequests
     patch_method = 'PATCH'
     retries = 0
     begin
-      Log.request_info(url, patch_method, Log.format_payload(options[:body]))
       response = patch(url, options)
-      Log.request_info(url, patch_method, Log.format_response_body(response.body, response.code))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, patch_method))
       if response.code != expected_status_code
         raise Unexpected_status_code, "The expected status code is #{expected_status_code}, but received #{response.code}"
       end
       return response
     rescue StandardError => e
-      Log.request_warn(url, patch_method, e.message)
+      Log.request_warn(url, e.message)
       retries += 1
       if retries <= MAX_RETRIES
-        Log.request_info(url, patch_method,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
+        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
         sleep(RETRY_INTERVAL)
         retry
       else
-        Log.request_error(url, patch_method,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace}")
+        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+        Log.theme_and_debug("END", "\n\n")
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end
@@ -199,25 +193,25 @@ class HTTPRequests
     get_method = 'GET'
     retries = 0
     begin
-      Log.request_info(url, get_method, Log.format_payload(options[:body]))
       response = get(url, options)
-      Log.request_info(url, get_method, Log.format_response_body(response.body, response.code))
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, get_method))
       value = find_value_by_path(response.body, json_path_filter)
       if !value.empty?
-        Log.request_info(url, get_method, "JSON path result: #{value}")
+        Log.request_info(url, "JSON path result: #{value}")
         return response
       end
-      Log.request_info(url, get_method, "JSON path result: 'nil'")
+      Log.request_info(url, "JSON path result: 'nil'")
       raise Json_path_without_results
     rescue StandardError => e
-      Log.request_warn(url, get_method, e.message)
+      Log.request_warn(url, e.message)
       retries += 1
       if retries <= MAX_RETRIES
-        Log.request_info(url, get_method,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
+        Log.request_info(url,"Retry the request (Attempt #{retries}). Trying again in #{RETRY_INTERVAL} second(s)...")
         sleep(RETRY_INTERVAL)
         retry
       else
-        Log.request_error(url, get_method,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace}")
+        Log.request_error(url,"Failed after #{MAX_RETRIES} attempts.\n   Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+        Log.theme_and_debug("END", "\n\n")
         raise "Failed after #{MAX_RETRIES} attempts: Error: #{e.message}"
       end
     end

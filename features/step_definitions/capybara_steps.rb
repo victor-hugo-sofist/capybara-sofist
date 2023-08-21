@@ -25,14 +25,18 @@ Quando("filtramos pela empresa com nome {string}") do |name|
 end
 
 Então("devemos encontrar detalhes com o nome da empresa junto ao seu ticker {string}") do | ticker |
+  
   Log.step_debug("Então devemos encontrar detalhes com o nome da empresa junto ao seu ticker #{ticker}")
 
   begin
     expect(@result). not_to be_nil
     expect(@result['Symbol']). to eql(ticker)
-  rescue RSpec::Expectations::ExpectationNotMetError => e
+  rescue => e
     Log.step_error(e.message, e.backtrace)
+    Log.theme_and_debug("END", "\n\n")
     raise e
+  else
+    Log.theme_and_debug("END", "\n\n")
   end
 end
 
@@ -50,9 +54,12 @@ Então("devemos encontrar detalhes com o nome da empresa junto ao seu preço de 
   begin
     expect(@result). not_to be_nil
     expect(@result['Price']).to be == price
-  rescue RSpec::Expectations::ExpectationNotMetError => e
+  rescue => e
     Log.step_error(e.message, e.backtrace)
+    Log.theme_and_debug("END", "\n\n")
     raise e
+  else
+    Log.theme_and_debug("END", "\n\n")
   end
 end
 
@@ -63,6 +70,7 @@ Dado("que enviamos uma requisição para alterar o preço de uma ação com tick
   @random_price = (min + rand * (max - min)) * 100
   @random_price = @random_price.round / 100.0
   
+
   Log.step_debug("Dado que enviamos uma requisição para alterar o preço de uma ação com ticker CHNG3")
   @response = HTTPRequests.retryable_patch_based_in_status_code('http://192.168.0.40:5000/stock/CHNG3/change/price/', 202, headers: { 'Content-Type' => 'application/json' }, body: JSON.generate( { "Price": @random_price } ))
 
@@ -73,9 +81,12 @@ Então("devemos alterar o preço com base em um valor aleatório") do
   begin
     expect(@result). not_to be_nil
     expect(@result['Price']).to be == @random_price
-  rescue RSpec::Expectations::ExpectationNotMetError => e
+  rescue => e
     Log.step_error(e.message, e.backtrace)
+    Log.theme_and_debug("END", "\n\n")
     raise e
+  else
+    Log.theme_and_debug("END", "\n\n")
   end
 end
 
@@ -117,8 +128,11 @@ Então("o produto não deve mais constar na base de dados") do
   @response = HTTPRequests.retryable_get_based_in_status_code('http://192.168.0.40:5000/stock/NEEW3/', 400, headers: { 'Content-Type' => 'application/json' })
   begin
     expect(@response.code).to be == 400
-  rescue RSpec::Expectations::ExpectationNotMetError => e
+  rescue => e
     Log.step_error(e.message, e.backtrace)
+    Log.theme_and_debug("END", "\n\n")
     raise e
+  else
+    Log.theme_and_debug("END", "\n\n")
   end
 end
