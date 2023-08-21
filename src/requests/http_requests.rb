@@ -2,6 +2,7 @@ require 'httparty'
 require 'json'
 require 'jsonpath'
 require 'logger'
+require 'date'
 
 class Unexpected_status_code < StandardError
 end
@@ -11,7 +12,10 @@ end
 
 class Log
 
-  file = File.open('logs/test_logs.log', File::WRONLY | File::APPEND | File::CREAT)
+  current_time = DateTime.now
+  formatted_time = current_time.strftime('%d-%m-%Y_%Hh%Mm%Ss')
+  log_file_path = "logs/log_#{formatted_time}.log"
+  file = File.open(log_file_path, File::WRONLY | File::APPEND | File::CREAT)
   @log = Logger.new(file)
 
   def self.test_end ()
