@@ -18,13 +18,19 @@ class HTTPMethod
   POST = "POST"
   DELETE = "DELETE"
   PATCH = "PATCH"
+  PUT = "PUT"
 end
 
 class Log
 
+  logs_path = "logs"
+  unless File.directory?(logs_path)
+    Dir.mkdir(logs_path)
+  end
+
   current_time = DateTime.now
   formatted_time = current_time.strftime('%d-%m-%Y_%Hh%Mm%Ss')
-  log_file_path = "logs/log_#{formatted_time}.log"
+  log_file_path = "#{logs_path}/log_#{formatted_time}.log"
   file = File.open(log_file_path, File::WRONLY | File::APPEND | File::CREAT)
   @log = Logger.new(file)
 
@@ -128,6 +134,9 @@ class HTTPRequests
       when HTTPMethod::PATCH
         request_method = HTTPMethod::PATCH
         response = patch(url, options)
+      when HTTPMethod::PUT
+        request_method = HTTPMethod::PUT
+        response = put(url, options)
       else
         raise Unexpected_request_method
       end
@@ -149,6 +158,38 @@ class HTTPRequests
         Log.test_end()
         raise "Failed after #{MAX_RETRIES} attempts. Error: #{e.message}"
       end
+    end
+  end
+
+  def self.request_to(url, method, options = {})
+
+    request_method = nil
+    response = nil
+
+    begin
+      case method
+      when HTTPMethod::GET
+        request_method = HTTPMethod::GET
+        response = get(url, options)
+      when HTTPMethod::POST
+        request_method = HTTPMethod::POST
+        response = post(url, options)
+      when HTTPMethod::DELETE
+        request_method = HTTPMethod::DELETE
+        response = delete(url, options)
+      when HTTPMethod::PATCH
+        request_method = HTTPMethod::PATCH
+        response = patch(url, options)
+      else
+        raise Unexpected_request_method
+      end
+
+      Log.request_info(url, Log.format_request_info(options[:body], response.body, response.code, request_method))
+
+      return response
+    rescue StandardError => e
+      Log.request_error(url,"Error: #{e.message}\n   Backtrace: #{e.backtrace.join("\n   ")}")
+      raise e
     end
   end
  
